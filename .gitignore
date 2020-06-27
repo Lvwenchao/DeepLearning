@@ -1,0 +1,9 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/.gitignore
+.idea/20200626.iml
+.idea/dictionaries/
+.idea/inspectionProfiles/
+.idea/misc.xml
+.idea/modules.xml
+DeepLearn/
+resource/
