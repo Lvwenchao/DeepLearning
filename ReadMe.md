@@ -1,4 +1,7 @@
-## 本文摘要
+#说明
+## lesson1
+imageClassfication ------图像分类
+linearRegression ------ 线性回归
 
- 1、线性回归（lesson1），进行最小参数误差的求取。 数据data.csv
- 2、手写字体识别（lesson2）
+## lesson2
+TensorFlow的基础知识以及高级操作
