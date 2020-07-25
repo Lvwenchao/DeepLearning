@@ -11,5 +11,9 @@ TensorFlow的基础知识以及高级操作
 
 ## lesson4
 梯度下降
-#l3  激活函数和损失函数
-#l3  单层感知机
+#l3  链式规则 linkrule
+#l3  单层感知机 singleLayerperception
+#l3  手写数字识别（实战） fashionMnist
+#l3  可视化实战
+
+## lesson5 keras 高层接口
