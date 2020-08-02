@@ -16,4 +16,6 @@ TensorFlow的基础知识以及高级操作
 #l3  手写数字识别（实战） fashionMnist
 #l3  可视化实战
 
-## lesson5 keras 高层接口
+## lesson5 keras 高层接口]
+compile & fit => model中的方法进行简单训练
+customize_layer => 自定义层

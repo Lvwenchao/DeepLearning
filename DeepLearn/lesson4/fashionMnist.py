@@ -5,17 +5,19 @@ import tensorflow as tf
 import numpy as np
 import datetime
 from tensorflow import keras
-from tensorflow.keras import datasets, layers, Sequential, optimizers
+from tensorflow.keras import datasets, layers, Sequential, optimizers, metrics
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
+# 数据预处理
 def preprocess(x, y):
     x = tf.cast(x, dtype=tf.float32) / 255.
     y = tf.cast(y, dtype=tf.int32)
     return x, y
 
 
+# getGata and
 batch_size = 128
 (x_train, y_train), (x_test, y_test) = datasets.fashion_mnist.load_data()
 print(x_train.shape, y_train.shape)
@@ -29,6 +31,7 @@ sample = next(db_iter)[0]
 sample_image = tf.reshape(x_train[:25, :, :], [-1, 28, 28, 1])
 print(sample[0].shape, sample[1].shape)
 
+# create model
 model = Sequential([layers.Dense(256, activation=tf.nn.relu),
                     layers.Dense(128, activation=tf.nn.relu),
                     layers.Dense(64, activation=tf.nn.relu),
@@ -37,8 +40,16 @@ model = Sequential([layers.Dense(256, activation=tf.nn.relu),
 model.build(input_shape=[None, 28 * 28])
 model.summary()
 print(len(model.trainable_variables))
-optimizer = optimizers.Adam(lr=0.01)
+model.compile(optimizer=optimizers.Adam(lr=0.01),
+              loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
 
+optimizer=optimizers.Adam(lr=0.01)
+# create meter
+loss_metric = metrics.Mean()
+acc_metric = metrics.Accuracy()
+
+# create log file
 current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 log_dir = "logs/" + current_time
 summary_writer = tf.summary.create_file_writer(log_dir)
@@ -46,6 +57,7 @@ with summary_writer.as_default():
     tf.summary.image("Train_sample", sample_image, step=0)
 
 
+# 训练数据以及测试数据
 def main():
     total_correct, total_num = 0, 0
     for epoch in range(10):
@@ -59,12 +71,12 @@ def main():
                 loss_mse = tf.reduce_mean(tf.losses.MSE(y, out))
                 # cross_entrope
                 loss_ce = tf.reduce_mean(tf.losses.categorical_crossentropy(y, out, from_logits=True))
-
+                loss_metric.update_state(loss_ce)
             grads = tape.gradient(loss_ce, model.trainable_variables)
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
             if step % 100 == 0:
-                print(step, "loss:", loss_ce)
+                print(step, "loss:", loss_metric.result().numpy())
                 with summary_writer.as_default():
                     tf.summary.scalar('train-loss', float(loss_ce), step=epoch)
 
@@ -80,8 +92,11 @@ def main():
             total_correct += int(correct)
             total_num += x.shape[0]
 
+            # 用 tensorflow提供的方法代替上面效果
+            acc_metric.update_state(y, pre)
+
         acc = total_correct / total_num
-        print(epoch, "accuracy:", acc)
+        print(epoch, "accuracy:", acc, acc_metric.result().numpy())
         with summary_writer.as_default():
             tf.summary.scalar('test-acc', float(acc), step=epoch)
 
