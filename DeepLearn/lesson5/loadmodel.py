@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow import keras
 from DeepLearn.lesson5.customize import CustomizeModel
 from tensorflow.keras import datasets, layers, Sequential, optimizers, metrics
-from DeepLearn.lesson5.preprocess import preprocess
+from DeepLearn.lesson5.preprocess import preprocess,preprocess_onehot
 
 # readData
 batch_size = 128
@@ -12,8 +12,8 @@ batch_size = 128
 print('dataset:', x_train.shape, y_train.shape)
 train_db = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 test_db = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-train_db = train_db.map(preprocess).shuffle(60000).batch(batch_size)
-test_db = test_db.map(preprocess).batch(batch_size)
+train_db = train_db.map(preprocess_onehot()).shuffle(60000).batch(batch_size)
+test_db = test_db.map(preprocess_onehot()).batch(batch_size)
 
 # 导入模型
 network = Sequential([layers.Dense(256, activation=tf.nn.relu),
@@ -31,5 +31,5 @@ network.load_weights("./models/my_model")
 # 对存储的模型进行测试
 network.evaluate(test_db)
 
-network.save('model.h5')
+network.save('./model.h5')
 del network
