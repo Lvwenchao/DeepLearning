@@ -5,7 +5,7 @@ import tensorflow as tf
 import numpy as np
 import datetime
 from tensorflow import keras
-from tensorflow.keras import datasets, layers, Sequential, optimizers, metrics
+from tensorflow.keras import datasets, layers, Sequential, optimizers, metrics, regularizers
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -33,18 +33,18 @@ print(sample[0].shape, sample[1].shape)
 
 # create model
 model = Sequential([layers.Dense(256, activation=tf.nn.relu),
+                    layers.Dropout(0.5),
                     layers.Dense(128, activation=tf.nn.relu),
+                    layers.Dropout(0.5),
                     layers.Dense(64, activation=tf.nn.relu),
+                    layers.Dropout(0.5),
                     layers.Dense(32, activation=tf.nn.relu),
-                    layers.Dense(10)])
+                    layers.Dense(10, activation=tf.sigmoid)])
 model.build(input_shape=[None, 28 * 28])
 model.summary()
 print(len(model.trainable_variables))
-model.compile(optimizer=optimizers.Adam(lr=0.01),
-              loss=tf.losses.CategoricalCrossentropy(from_logits=True),
-              metrics=['accuracy'])
 
-optimizer=optimizers.Adam(lr=0.01)
+optimizer = optimizers.Adam(lr=0.001)
 # create meter
 loss_metric = metrics.Mean()
 acc_metric = metrics.Accuracy()
@@ -71,8 +71,14 @@ def main():
                 loss_mse = tf.reduce_mean(tf.losses.MSE(y, out))
                 # cross_entrope
                 loss_ce = tf.reduce_mean(tf.losses.categorical_crossentropy(y, out, from_logits=True))
+                loss_regularization = []
+                for p in model.trainable_variables:
+                    loss_regularization.append(tf.nn.l2_loss(p))
+                loss_regularization = tf.reduce_mean(tf.stack(loss_regularization))
+                loss_ce = loss_ce + 0.001 * loss_regularization
                 loss_metric.update_state(loss_ce)
             grads = tape.gradient(loss_ce, model.trainable_variables)
+
             optimizer.apply_gradients(zip(grads, model.trainable_variables))
 
             if step % 100 == 0:
