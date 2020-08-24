@@ -1,12 +1,9 @@
 # write by Mrlv
 # coding:utf-8
 import os
-import datetime
-import numpy as np
 import tensorflow as tf
-from tensorflow import keras
-from DeepLearn.lesson5.customize import CustomizeModel
-from tensorflow.keras import datasets, layers, Sequential, optimizers, metrics
+from DeepLearn.tools.customize import CustomizeModel
+from tensorflow.keras import datasets, optimizers
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 

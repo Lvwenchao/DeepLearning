@@ -1,10 +1,8 @@
 # write by Mrlv
 # coding:utf-8
 import tensorflow as tf
-from tensorflow import keras
-from DeepLearn.lesson5.customize import CustomizeModel
-from tensorflow.keras import datasets, layers, Sequential, optimizers, metrics
-from DeepLearn.lesson5.preprocess import preprocess,preprocess_onehot
+from tensorflow.keras import datasets, layers, Sequential, optimizers
+from DeepLearn.tools.preprocess import preprocess_onehot
 
 # readData
 batch_size = 128

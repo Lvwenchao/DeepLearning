@@ -1,10 +1,9 @@
 # write by Mrlv
 # coding:utf-8
 import tensorflow as tf
-from tensorflow import keras
 from tensorflow.keras import datasets, optimizers
-from DeepLearn.lesson5.preprocess import preprocess
-from DeepLearn.lesson5 import customize
+from DeepLearn.tools.preprocess import preprocess
+from DeepLearn.tools import customize
 
 batch_size = 128
 (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()

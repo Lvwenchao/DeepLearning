@@ -19,3 +19,10 @@ TensorFlow的基础知识以及高级操作
 ## lesson5 keras 高层接口]
 compile & fit => model中的方法进行简单训练
 customize_layer => 自定义层
+
+## lesson6 卷积神经网络
+bn_layer BN层的添加
+cifar100_conv2d 卷积层应用
+cifar100_renet  残差神经网络
+
+## lesson7 循环神经网络
