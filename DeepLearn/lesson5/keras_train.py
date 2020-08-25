@@ -31,5 +31,4 @@ model.compile(optimizer=optimizers.Adam(lr=1e-3),
 
 model.fit(train_date, epochs=15, validation_data=test_data, validation_freq=2)
 
-# %%
 model.save_weights('./models/cifar10')
