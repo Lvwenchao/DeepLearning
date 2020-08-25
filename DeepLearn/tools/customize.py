@@ -143,6 +143,13 @@ def resnet18():
 # RNN层
 class RNN(Model):
     def __init__(self, units, embedding_len, input_len, total_words):
+        """
+
+        :param units: simrnn 向量大小
+        :param embedding_len: 单词的向量长度
+        :param input_len: 输入每个单个时间序列的长度
+        :param total_words: 句子数
+        """
         super(RNN, self).__init__()
         # embedding
         self.embedding = layers.Embedding(input_dim=total_words, output_dim=embedding_len, input_length=input_len)

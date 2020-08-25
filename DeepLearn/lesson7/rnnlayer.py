@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import datasets, optimizers
 from DeepLearn.tools.customize import RNN
+import os
 
 # load_dat
 batchsz = 128
@@ -23,6 +24,13 @@ test_data = test_data.shuffle(1000).batch(batchsz, drop_remainder=True)
 simple = next(iter(train_data))
 print(simple[0].shape, simple[1].shape)
 
+# file save path
+checkpoint_path = r'E:\pythonProject\DeepLearn\resources\models\rnn\rnn.ckpt'
+checkpoint_dir = os.path.dirname(checkpoint_path)
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                 save_best_only=True,
+                                                 verbose=1)
+
 
 def main():
     units = 64
@@ -31,19 +39,21 @@ def main():
 
     model.compile(optimizer=optimizers.Adam(0.001),
                   loss=tf.losses.BinaryCrossentropy(),
-                  metrics=['accuracy'])
+                  metrics=['accuracy']
+                  )
 
-    model.fit(train_data, epochs=epochs, validation_data=test_data)
+    model.fit(train_data,
+              epochs=epochs,
+              validation_data=test_data,
+              callbacks=[cp_callback])
 
     model.evaluate(test_data)
-
-    model.save_weights(r'E:\pythonProject\DeepLearn\resources\models\rnn\Rnn')
 
 
 def test_model():
     units = 64
     model = RNN(units, embedding_len, max_words_len, total_words)
-    model.load_weights(r'E:\pythonProject\DeepLearn\resources\models\rnn\Rnn')
+    model.load_weights(checkpoint_path)
 
     model.compile(optimizer=optimizers.Adam(0.001),
                   loss=tf.losses.BinaryCrossentropy(),
