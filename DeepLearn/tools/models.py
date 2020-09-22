@@ -173,3 +173,36 @@ class RNN(Model):
         out = self.fc(out)
         prob = tf.sigmoid(out)
         return prob
+
+
+class LSTM(Model):
+    def __init__(self, units, embedding_len, input_len, total_words):
+        """
+
+        :param units: simrnn 向量大小
+        :param embedding_len: 单词的向量长度
+        :param input_len: 输入每个单个时间序列的长度
+        :param total_words: 句子数
+        """
+        super(LSTM, self).__init__()
+        # embedding
+        self.embedding = layers.Embedding(input_dim=total_words, output_dim=embedding_len, input_length=input_len)
+        # RnnLayer
+        self.rnn = Sequential([
+            layers.LSTM(units, dropout=0.5, return_sequences=True, unroll=True),
+            layers.LSTM(units, dropout=0.5, unroll=True)
+        ])
+
+        # fullConnection
+        self.fc = layers.Dense(1)
+
+    def call(self, inputs, training=None, mask=None):
+        out = inputs
+        # [b,80]-[b,80,100]
+        out = self.embedding(out)
+        # [b,80,100]->[b,64]
+        out = self.rnn(out)
+        # [b,64]->[b,1]
+        out = self.fc(out)
+        prob = tf.sigmoid(out)
+        return prob
