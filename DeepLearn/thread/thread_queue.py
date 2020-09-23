@@ -42,18 +42,25 @@ def get_detail_url(queue):
         print("获取详情页链接结束")
 
 
-# lock = threading.Lock()
-# for i in range(2):
-#     mythread = MyThread(lock, 'threadName' + str(i)).start()
-queue = Queue(200)
-get_html_thread = threading.Thread(target=get_detail_html, args=(queue,))
-get_ulr_thread = threading.Thread(target=get_detail_url, args=(queue,))
-# get_html_thread.setDaemon(True)
-# get_ulr_thread.setDaemon(True)
-startime = time.time()
-get_ulr_thread.start()
-get_html_thread.start()
-get_html_thread.join()
-get_ulr_thread.join()
+def main():
+    # 共享变量Queue
+    queue = Queue(200)
+    get_html_thread = threading.Thread(target=get_detail_html, args=(queue,))
+    get_ulr_thread = threading.Thread(target=get_detail_url, args=(queue,))
 
-print("last time:{}".format(time.time() - startime))
+    # 将线程变为守护线程
+    # get_html_thread.setDaemon(True)
+    # get_ulr_thread.setDaemon(True)
+    startime = time.time()
+    get_ulr_thread.start()
+    get_html_thread.start()
+
+    # 线程阻
+    get_html_thread.join()
+    get_ulr_thread.join()
+
+    print("last time:{}".format(time.time() - startime))
+
+
+if __name__ == '__main__':
+    main()

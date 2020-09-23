@@ -3,10 +3,12 @@
 import time
 
 import tensorflow as tf
+import os
 from tensorflow.keras import optimizers
-from DeepLearn.tools.customize import LSTM
+from DeepLearn.tools.models import LSTM
 from DeepLearn.lesson7 import rnnlayer
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 batchsz = 128
 total_words = 10000
 embedding_len = 100

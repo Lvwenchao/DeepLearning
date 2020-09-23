@@ -3,7 +3,7 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import datasets, optimizers
-from DeepLearn.tools.customize import RNN
+from DeepLearn.tools.models import RNN
 import os
 
 # load_dat
@@ -60,7 +60,6 @@ def test_model():
                   metrics=['accuracy'])
 
     model.evaluate(test_data)
-
 
 
 if __name__ == '__main__':
