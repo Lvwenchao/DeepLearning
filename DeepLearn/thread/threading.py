@@ -38,14 +38,14 @@ def get_detail_url(queue):
         print("开始获取详情页链接")
         time.sleep(0.3)
         for i in range(20):
-            queue.put("https://www.thread.com//"+str(i))
+            queue.put("https://www.thread.com//" + str(i))
         print("获取详情页链接结束")
 
 
 # lock = threading.Lock()
 # for i in range(2):
 #     mythread = MyThread(lock, 'threadName' + str(i)).start()
-queue=Queue(200)
+queue = Queue(200)
 get_html_thread = threading.Thread(target=get_detail_html, args=(queue,))
 get_ulr_thread = threading.Thread(target=get_detail_url, args=(queue,))
 # get_html_thread.setDaemon(True)
