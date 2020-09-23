@@ -38,10 +38,10 @@ def gradient_runner(iterNum, points, w_start, b_start, lr):
 
 
 def run():
-    points = np.loadtxt('../resource/data.csv', delimiter=',')
+    points = np.loadtxt('../resources/data.csv', delimiter=',')
     w_start = 0
     b_start = 0
-    iterationNum = 1000
+    iterationNum = 100000
     learning_rate = 0.0001
     print("gradient decent at w={0},b={1},loss={2}\n"
           .format(w_start, b_start, compute_loss(w_start, b_start, points)))

@@ -7,8 +7,7 @@ a = tf.random.uniform([4, 256], maxval=50)
 model = Sequential([layers.Dense(128, activation='relu'),
                     layers.Dense(64, activation='relu'),
                     layers.Dense(10)])
-print(model(a).shape)
 model.build([None, 256])
-print(model.summary())
+model.summary()
 for p in model.variables:
     print(p.name, p.shape)
