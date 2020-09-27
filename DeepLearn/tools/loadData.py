@@ -38,3 +38,7 @@ def minist_data():
     test_data = test_data.map(data_preprocess)
     test_data = test_data.shuffle(10000).batch(100)
     return train_data, test_data
+
+
+def fationmnist_data():
+    (x_train, ytrain), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data
