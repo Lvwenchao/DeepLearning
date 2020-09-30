@@ -50,7 +50,7 @@ def main():
 
     model.evaluate(test_data)
 
-    model.save_weights(r'E:\pythonProject\DeepLearning\resources\models\mnist', save_format='tf')
+    model.save_weights(r'E:\pythonProject\DeepLearn\resources\models\mnist', save_format='tf')
     # predict
 
 
