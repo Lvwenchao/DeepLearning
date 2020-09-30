@@ -6,29 +6,19 @@ import numpy as np
 import datetime
 from tensorflow import keras
 from tensorflow.keras import datasets, layers, Sequential, optimizers, metrics, regularizers
+import DeepLearn.tools.loadData as ld
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-
 # 数据预处理
-def preprocess(x, y):
-    x = tf.cast(x, dtype=tf.float32) / 255.
-    y = tf.cast(y, dtype=tf.int32)
-    return x, y
 
 
 # getGata and
 batch_size = 128
-(x_train, y_train), (x_test, y_test) = datasets.fashion_mnist.load_data()
-print(x_train.shape, y_train.shape)
-train_db = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-test_db = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-train_db = train_db.map(preprocess).shuffle(10000).batch(batch_size)
-test_db = test_db.map(preprocess).shuffle(10000).batch(batch_size)
+train_data, test_data = ld.fationmnist_data(batch_size)
 
-db_iter = iter(train_db)
+db_iter = iter(train_data)
 sample = next(db_iter)[0]
-sample_image = tf.reshape(x_train[:25, :, :], [-1, 28, 28, 1])
 print(sample[0].shape, sample[1].shape)
 
 # create model
@@ -52,16 +42,13 @@ acc_metric = metrics.Accuracy()
 # create log file
 current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 log_dir = "logs/" + current_time
-summary_writer = tf.summary.create_file_writer(log_dir)
-with summary_writer.as_default():
-    tf.summary.image("Train_sample", sample_image, step=0)
 
 
 # 训练数据以及测试数据
 def main():
     total_correct, total_num = 0, 0
     for epoch in range(10):
-        for step, (x, y) in enumerate(train_db):
+        for step, (x, y) in enumerate(train_data):
             x = tf.reshape(x, [-1, 28 * 28])
             # [b,]->[b,10]
             y = tf.one_hot(y, depth=10)
@@ -87,7 +74,7 @@ def main():
                     tf.summary.scalar('train-loss', float(loss_ce), step=epoch)
 
         # model test
-        for step, (x, y) in enumerate(test_db):
+        for step, (x, y) in enumerate(test_data):
             x = tf.reshape(x, [-1, 28 * 28])
             # [b,784]->[b,10]
             prob = model(x)

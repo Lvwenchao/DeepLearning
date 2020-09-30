@@ -3,7 +3,7 @@
 import tensorflow as tf
 from tensorflow.keras import datasets, optimizers
 from DeepLearn.tools.preprocess import preprocess
-from DeepLearn.tools import customize
+from DeepLearn.tools import models
 
 batch_size = 128
 (x_train, y_train), (x_test, y_test) = datasets.cifar10.load_data()
@@ -24,7 +24,7 @@ sample = next(iter(train_date))
 print(sample[0].shape, sample[1].shape)
 
 # create model and train_data
-model = customize.MyModel()
+model = models.MyModel()
 model.compile(optimizer=optimizers.Adam(lr=1e-3),
               loss=tf.losses.CategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])

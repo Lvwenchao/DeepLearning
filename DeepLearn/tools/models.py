@@ -27,6 +27,7 @@ class CustomizeModel(Model):
         self.ly5 = CustomizeDense(32, 10)
 
     def call(self, inputs, training=None, mask=None):
+        inputs = tf.reshape(inputs, [-1, 784])
         out = tf.nn.relu(self.ly1(inputs))
         out = tf.nn.relu(self.ly2(out))
         out = tf.nn.relu(self.ly3(out))
