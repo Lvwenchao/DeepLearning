@@ -1,33 +1,35 @@
 # write by Mrlv
 # coding:utf-8
 import tensorflow as tf
+import os
 from tensorflow.keras import datasets, layers, Sequential, optimizers
-from DeepLearn.tools.preprocess import preprocess_onehot
+from DeepLearn.tools import loadData
+from DeepLearn.tools import models
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 
 # readData
-batch_size = 128
-(x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
-print('dataset:', x_train.shape, y_train.shape)
-train_db = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-test_db = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-train_db = train_db.map(preprocess_onehot()).shuffle(60000).batch(batch_size)
-test_db = test_db.map(preprocess_onehot()).batch(batch_size)
+def main():
+    batch_size = 128
+    train_data, test_data = loadData.minist_data(batch_size)
+    simple = next(iter(train_data))
+    print(simple[0].shape, simple[1].shape)
 
-# 导入模型
-network = Sequential([layers.Dense(256, activation=tf.nn.relu),
-                      layers.Dense(128, activation=tf.nn.relu),
-                      layers.Dense(64, activation=tf.nn.relu),
-                      layers.Dense(32, activation=tf.nn.relu),
-                      layers.Dense(10)])
+    # 导入模型
+    network = models.MyModel(784)
 
-network.compile(optimizer=optimizers.Adam(lr=0.01),
-                loss=tf.losses.CategoricalCrossentropy(from_logits=True),
-                metrics=['accuracy'])
+    network.compile(optimizer=optimizers.Adam(lr=0.01),
+                    loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+                    metrics=['accuracy'])
 
-network.load_weights("./models/my_model")
+    network.load_weights(r'E:\pythonProject\DeepLearning\resources\models\mnist').expect_partial()
 
-# 对存储的模型进行测试
-network.evaluate(test_db)
+    # 对存储的模型进行测试
+    network.evaluate(test_data)
 
-network.save('./model.h5')
-del network
+    # 预测
+
+
+if __name__ == '__main__':
+    main()

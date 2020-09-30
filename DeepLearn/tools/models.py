@@ -1,5 +1,7 @@
 # write by Mrlv
 # coding:utf-8
+from abc import ABC
+
 from tensorflow.keras import layers, Model, Sequential
 import tensorflow as tf
 
@@ -8,8 +10,8 @@ import tensorflow as tf
 class CustomizeDense(layers.Layer):
     def __init__(self, inp_dim, outp_dim):
         super(CustomizeDense, self).__init__()
-        self.kernel = self.add_variable('w', [inp_dim, outp_dim])
-        self.bias = self.add_variable('b', [outp_dim])
+        self.kernel = self.add_weight('w', [inp_dim, outp_dim])
+        self.bias = self.add_weight('b', [outp_dim])
 
     def call(self, inputs, training=None):
         out = inputs @ self.kernel + self.bias
@@ -17,9 +19,12 @@ class CustomizeDense(layers.Layer):
 
 
 # 自定义模型
-class CustomizeModel(Model):
+class MyModel(Model):
+    def get_config(self):
+        pass
+
     def __init__(self, input_dim):
-        super(CustomizeModel, self).__init__()
+        super(MyModel, self).__init__()
         self.ly1 = CustomizeDense(input_dim, 256)
         self.ly2 = CustomizeDense(256, 128)
         self.ly3 = CustomizeDense(128, 64)
@@ -27,42 +32,13 @@ class CustomizeModel(Model):
         self.ly5 = CustomizeDense(32, 10)
 
     def call(self, inputs, training=None, mask=None):
-        inputs = tf.reshape(inputs, [-1, 784])
+        inputs = tf.reshape(inputs, [-1, 28 * 28])
         out = tf.nn.relu(self.ly1(inputs))
         out = tf.nn.relu(self.ly2(out))
         out = tf.nn.relu(self.ly3(out))
         out = tf.nn.relu(self.ly4(out))
         out = self.ly5(out)
 
-        return out
-
-
-class MyDense(layers.Layer):
-    def __init__(self, input_dim, ouput_dim):
-        super(MyDense, self).__init__()
-        self.kernel = self.add_variable('w', [input_dim, ouput_dim])
-
-    def call(self, inputs, training=None):
-        out = inputs @ self.kernel
-        return out
-
-
-class MyModel(Model):
-    def __init__(self):
-        super(MyModel, self).__init__()
-        self.ly1 = MyDense(32 * 32 * 3, 256)
-        self.ly2 = MyDense(256, 128)
-        self.ly3 = MyDense(128, 64)
-        self.ly4 = MyDense(64, 32)
-        self.ly5 = MyDense(32, 10)
-
-    def call(self, inputs, training=None, mask=None):
-        x = tf.reshape(inputs, [-1, 32 * 32 * 3])
-        out = tf.nn.relu(self.ly1(x))
-        out = tf.nn.relu(self.ly2(out))
-        out = tf.nn.relu(self.ly3(out))
-        out = tf.nn.relu(self.ly4(out))
-        out = self.ly5(out)
         return out
 
 
@@ -100,6 +76,9 @@ class BasicBlock(layers.Layer):
 
 # ResnetModel
 class ResNet(Model):
+    def get_config(self):
+        pass
+
     def __init__(self, layers_dim, num_class=100):  # [2,2,2, 2]
         super(ResNet, self).__init__()
         self.start = Sequential([layers.Conv2D(64, (3, 3), strides=(1, 1)),
@@ -126,7 +105,8 @@ class ResNet(Model):
         out = self.fc(out)
         return out
 
-    def build_resblock(self, filter_num, blocks, stride=1):
+    @staticmethod
+    def build_resblock(filter_num, blocks, stride=1):
         res_block = Sequential()
         # may down sample
         res_block.add(BasicBlock(filter_num, stride))
@@ -136,13 +116,8 @@ class ResNet(Model):
         return res_block
 
 
-# resnet18
-def resnet18():
-    return ResNet([2, 2, 2, 2])
-
-
 # RNN层
-class RNN(Model):
+class RNN(Model, ABC):
     def __init__(self, units, embedding_len, input_len, total_words):
         """
 
@@ -176,7 +151,7 @@ class RNN(Model):
         return prob
 
 
-class LSTM(Model):
+class LSTM(Model, ABC):
     def __init__(self, units, embedding_len, input_len, total_words):
         """
 
@@ -207,3 +182,8 @@ class LSTM(Model):
         out = self.fc(out)
         prob = tf.sigmoid(out)
         return prob
+
+
+# resnet18
+def resnet18():
+    return ResNet([2, 2, 2, 2])
