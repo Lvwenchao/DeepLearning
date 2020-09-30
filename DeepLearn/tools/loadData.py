@@ -41,11 +41,13 @@ def minist_data(batchsize):
 
 
 def fationmnist_data(batch_size):
-    (x_train, ytrain), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data
-    train_data = tf.data.Dataset.from_tensor_slices((x_train, ytrain))
+    (x_train, y_train), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
+    y_train = tf.squeeze(y_train)
+    y_test = tf.squeeze(y_test)
+    train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
     test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-    train_data = train_data.map(preprocess).shuffle(10000).batch(batch_size)
-    test_data = test_data.map(preprocess).shuffle(x_train.shape[0]).batch(batch_size)
+    train_data = train_data.map(preprocess).shuffle(60000).batch(batch_size)
+    test_data = test_data.map(preprocess).shuffle(60000).batch(batch_size)
     return train_data, test_data
 
 
@@ -68,9 +70,4 @@ def auto_mpg_dataset():
     test_dataset = dataset.drop(train_dataset.index)
     train_label = train_dataset.pop('MPG')
     test_label = train_dataset.pop('MPG')
-
-    print(dataset)
-
-
-if __name__ == '__main__':
-    auto_mpg_dataset()
+    return (train_dataset, test_dataset), (train_label, test_label)
