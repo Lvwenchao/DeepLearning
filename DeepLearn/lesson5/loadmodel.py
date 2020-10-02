@@ -2,6 +2,8 @@
 # coding:utf-8
 import tensorflow as tf
 import os
+import cv2
+import matplotlib.pyplot as plt
 from tensorflow.keras import datasets, layers, Sequential, optimizers
 from DeepLearn.tools import loadData
 from DeepLearn.tools import models
@@ -23,12 +25,23 @@ def main():
                     loss=tf.losses.CategoricalCrossentropy(from_logits=True),
                     metrics=['accuracy'])
 
-    network.load_weights(r'E:\pythonProject\DeepLearning\resources\models\mnist').expect_partial()
+    network.load_weights(r'E:\pythonProject\DeepLearn\resources\models\mnist').expect_partial()
 
     # 对存储的模型进行测试
     network.evaluate(test_data)
 
     # 预测
+    img = simple[0][0]
+    pre = network(img)
+    pre_label = tf.argmax(pre, axis=1)
+    print(img.shape)
+    print(pre_label)
+
+    # show predict img
+    cv2.namedWindow('img', 0)
+    cv2.imshow('img', img.numpy())
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
 if __name__ == '__main__':
