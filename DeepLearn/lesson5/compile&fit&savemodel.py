@@ -4,7 +4,7 @@ import os
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-from DeepLearn.tools.loadData import minist_data
+from DeepLearn.tools.loadData import minist_data,fationmnist_data
 from DeepLearn.tools import models
 from tensorflow.keras import datasets, optimizers
 
@@ -31,10 +31,10 @@ def plot_image(predictions_array, true_label, img):
                                          color=color))
 
 
-def main():
+def train_mnist():
     # loadData
     batch_size = 128
-    train_data, test_data = minist_data(batch_size)
+    train_data, test_data = fationmnist_data(batch_size)
     sample = next(iter(train_data))
     print(sample[0].shape, sample[1].shape)
     # train
@@ -54,5 +54,27 @@ def main():
     # predict
 
 
+def train_fationmnist():
+    batch_size = 128
+    train_data, test_data = minist_data(batch_size)
+    sample = next(iter(train_data))
+    print(sample[0].shape, sample[1].shape)
+    # train
+    model = models.MyModel(28 * 28)
+    model.build([None, 28 * 28])
+    model.summary()
+
+    model.compile(optimizer=optimizers.Adam(lr=0.01),
+                  loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+                  metrics=['accuracy'])
+
+    model.fit(train_data, epochs=20, validation_data=test_data, validation_freq=5)  # validation_freq 表示每两次计算一次平均值
+
+    model.evaluate(test_data)
+
+    model.save_weights(r'E:\pythonProject\DeepLearn\resources\models\fmnist\fationmnist', save_format='tf')
+    # predict
+
+
 if __name__ == '__main__':
-    main()
+    train_fationmnist()
