@@ -25,21 +25,29 @@ class MyModel(Model):
 
     def __init__(self, input_dim):
         super(MyModel, self).__init__()
+
         self.ly1 = CustomizeDense(input_dim, 256)
+        self.dp1 = layers.Dropout(0.3)
         self.ly2 = CustomizeDense(256, 128)
         self.ly3 = CustomizeDense(128, 64)
         self.ly4 = CustomizeDense(64, 32)
+        # self.dp4 = layers.Dropout(0.5)
         self.ly5 = CustomizeDense(32, 10)
 
     def call(self, inputs, training=None, mask=None):
         inputs = tf.reshape(inputs, [-1, 28 * 28])
         out = tf.nn.relu(self.ly1(inputs))
+        out = self.dp1(out)
         out = tf.nn.relu(self.ly2(out))
         out = tf.nn.relu(self.ly3(out))
         out = tf.nn.relu(self.ly4(out))
+        # out = self.dp4(out)
         out = self.ly5(out)
 
         return out
+
+
+# CNN
 
 
 # Resnet 层
