@@ -11,34 +11,14 @@ from tensorflow.keras import datasets, optimizers
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
-def plot_image(predictions_array, true_label, img):
-    predictions_array, true_label, img = predictions_array, true_label, img
-    plt.grid(False)
-    plt.xticks([])
-    plt.yticks([])
-
-    plt.imshow(img, cmap='gray')
-
-    predicted_label = np.argmax(predictions_array)
-    if predicted_label == true_label:
-        color = 'blue'
-    else:
-        color = 'red'
-
-    plt.xlabel("{} {:2.0f}% ({})".format(predicted_label,
-                                         100 * np.max(predictions_array),
-                                         true_label,
-                                         color=color))
-
-
 def main():
     # loadData
     batch_size = 128
-    train_data, test_data = minist_data(batch_size)
+    train_data, val_data, test_data = minist_data(batch_size)
     sample = next(iter(train_data))
     print(sample[0].shape, sample[1].shape)
     # train
-    model = models.MyModel(28 * 28)
+    model = models.MyModel(28*28)
     model.build([None, 28 * 28])
     model.summary()
 
@@ -50,7 +30,7 @@ def main():
 
     model.evaluate(test_data)
 
-    model.save_weights(r'E:\pythonProject\DeepLearn\resources\models\mnist', save_format='tf')
+    # model.save_weights(r'E:\pythonProject\DeepLearn\resources\models\mnist', save_format='tf')
     # predict
 
 
