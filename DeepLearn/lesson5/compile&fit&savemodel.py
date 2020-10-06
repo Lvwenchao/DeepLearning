@@ -4,7 +4,7 @@ import os
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-from DeepLearn.tools.loadData import minist_data,fationmnist_data
+from DeepLearn.tools.loadData import minist_data, fationmnist_data
 from DeepLearn.tools import models
 from tensorflow.keras import datasets, optimizers
 
@@ -15,6 +15,8 @@ def main():
     # loadData
     batch_size = 128
     train_data, val_data, test_data = minist_data(batch_size)
+
+
 def plot_image(predictions_array, true_label, img):
     predictions_array, true_label, img = predictions_array, true_label, img
     plt.grid(False)
@@ -42,7 +44,7 @@ def train_mnist():
     sample = next(iter(train_data))
     print(sample[0].shape, sample[1].shape)
     # train
-    model = models.MyModel(28*28)
+    model = models.MyModel(28 * 28)
     model.build([None, 28 * 28])
     model.summary()
 

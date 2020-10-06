@@ -33,7 +33,13 @@ def cifar10_data(batch_size):
     return train_date, val_data, test_data
 
 
-def minist_data(batchsize):
+def cifar_100_data(batch_size):
+    (x_train, y_train), (x_test, y_test) = datasets.cifar100.load_data()
+    print('data:', x_train.shape, y_train.shape)
+    y
+
+
+def minist_data(batch_size):
     (x_train, y_train), (x_test, y_test) = datasets.mnist.load_data()
     y_train = tf.one_hot(y_train, depth=10)
     y_test = tf.one_hot(y_test, depth=10)
@@ -41,11 +47,11 @@ def minist_data(batchsize):
     y_train, y_val = tf.split(y_train, num_or_size_splits=[50000, 10000])
     print("data:", x_train.shape, y_train.shape, x_test.shape, y_test.shape)
     train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-    train_data = train_data.map(preprocess).shuffle(50000).batch(batchsize)
+    train_data = train_data.map(preprocess).shuffle(50000).batch(batch_size)
     val_data = tf.data.Dataset.from_tensor_slices((x_val, y_val))
-    val_data = val_data.map(preprocess).shuffle(10000).batch(batchsize)
+    val_data = val_data.map(preprocess).shuffle(10000).batch(batch_size)
     test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-    test_data = test_data.map(preprocess).shuffle(10000).batch(batchsize)
+    test_data = test_data.map(preprocess).shuffle(10000).batch(batch_size)
     return train_data, val_data, test_data
 
 

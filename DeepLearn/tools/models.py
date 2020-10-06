@@ -26,6 +26,7 @@ class MyModel(Model):
     def __init__(self, input_dim):
         super(MyModel, self).__init__()
 
+        self.fla = layers.Flatten()
         self.ly1 = CustomizeDense(input_dim, 256)
         self.dp1 = layers.Dropout(0.3)
         self.ly2 = CustomizeDense(256, 128)
@@ -35,7 +36,7 @@ class MyModel(Model):
         self.ly5 = CustomizeDense(32, 10)
 
     def call(self, inputs, training=None, mask=None):
-        inputs = tf.reshape(inputs, [-1, 28 * 28])
+        inputs = self.fla(inputs)
         out = tf.nn.relu(self.ly1(inputs))
         out = self.dp1(out)
         out = tf.nn.relu(self.ly2(out))
@@ -48,6 +49,41 @@ class MyModel(Model):
 
 
 # CNN
+class LetNet(Model, ABC):
+    def __init__(self):
+        super(LetNet, self).__init__()
+        self.conv2d_1 = layers.Conv2D(6, kernel_size=5, strides=1)
+        self.pool_max1 = layers.MaxPool2D(pool_size=2, strides=2)
+        self.relu1 = layers.ReLU()
+        self.conv2d_2 = layers.Conv2D(16, kernel_size=3, strides=1)
+        self.pool_max2 = layers.MaxPool2D(pool_size=2, strides=2)
+        self.relu2 = layers.ReLU()
+        self.fla = layers.Flatten()
+
+        # 全连接层
+        self.fc1 = layers.Dense(120, activation='relu')
+        self.fc2 = layers.Dense(84, activation='relu')
+        self.fc3 = layers.Dense(10)
+
+    def call(self, inputs, training=None, mask=None):
+        # [b,28,28,1]->[b,24,24,6]
+        out = self.conv2d_1(inputs)
+        # [b,24,24,6]->[b,12,12,6]
+        out = self.pool_max1(out)
+        out = self.relu1(out)
+        # [b,12,12,6] -> [b,10,10,16]
+        out = self.conv2d_2(out)
+        # [b,10,10,16]->[b,5,5,16]
+        out = self.pool_max2(out)
+        out = self.relu2(out)
+        # [b,5,5,16] -> [b,400]
+        out = self.fla(out)
+
+        # [b,400] -> [n,120] -> [b,84] -> [b,10]
+        out = self.fc1(out)
+        out = self.fc2(out)
+        out = self.fc3(out)
+        return out
 
 
 # Resnet 层
