@@ -8,6 +8,6 @@
 .idea/
 ./resources/logs/
 resources/logs/
-DeepLearn/compiltfitandsave/models/
+DeepLearn/compilefitandsave/models/
 resources/models/
 
