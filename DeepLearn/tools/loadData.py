@@ -19,8 +19,6 @@ def cifar10_data(batch_size):
     y_test = tf.squeeze(y_test)
     y_train = tf.one_hot(y_train, depth=10)
     y_test = tf.one_hot(y_test, depth=10)
-    x_train = tf.reshape(x_train, [-1, 32 * 32 * 3])
-    x_test = tf.reshape(x_test, [-1, 32 * 32 * 3])
     print("data:", 'train', x_train.shape, y_train.shape, 'test:', x_test.shape, y_test.shape)
     x_train, x_val = tf.split(x_train, axis=0, num_or_size_splits=[40000, 10000])
     y_train, y_val = tf.split(y_train, axis=0, num_or_size_splits=[40000, 10000])
@@ -33,10 +31,20 @@ def cifar10_data(batch_size):
     return train_date, val_data, test_data
 
 
-def cifar_100_data(batch_size):
+def cifar100_data(batch_size):
     (x_train, y_train), (x_test, y_test) = datasets.cifar100.load_data()
-    print('data:', x_train.shape, y_train.shape)
-    y
+    print("data:", 'train', x_train.shape, y_train.shape, 'test:', x_test.shape, y_test.shape)
+    y_train = tf.squeeze(y_train)
+    y_test = tf.squeeze(y_test)
+    x_train, x_val = tf.split(x_train, axis=0, num_or_size_splits=[40000, 10000])
+    y_train, y_val = tf.split(y_train, axis=0, num_or_size_splits=[40000, 10000])
+    train_date = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+    val_data = tf.data.Dataset.from_tensor_slices((x_val, y_val))
+    test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
+    train_date = train_date.map(preprocess).shuffle(40000).batch(batch_size)
+    val_data = val_data.map(preprocess).shuffle(10000).batch(batch_size)
+    test_data = test_data.map(preprocess).shuffle(10000).batch(batch_size)
+    return train_date, val_data, test_data
 
 
 def minist_data(batch_size):

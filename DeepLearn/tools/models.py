@@ -53,9 +53,11 @@ class LetNet(Model, ABC):
     def __init__(self):
         super(LetNet, self).__init__()
         self.conv2d_1 = layers.Conv2D(6, kernel_size=5, strides=1)
+        self.bn1 = layers.BatchNormalization()
         self.pool_max1 = layers.MaxPool2D(pool_size=2, strides=2)
         self.relu1 = layers.ReLU()
         self.conv2d_2 = layers.Conv2D(16, kernel_size=3, strides=1)
+        self.bn2 = layers.BatchNormalization()
         self.pool_max2 = layers.MaxPool2D(pool_size=2, strides=2)
         self.relu2 = layers.ReLU()
         self.fla = layers.Flatten()
@@ -68,11 +70,13 @@ class LetNet(Model, ABC):
     def call(self, inputs, training=None, mask=None):
         # [b,28,28,1]->[b,24,24,6]
         out = self.conv2d_1(inputs)
+        out = self.bn1(out)
         # [b,24,24,6]->[b,12,12,6]
         out = self.pool_max1(out)
         out = self.relu1(out)
         # [b,12,12,6] -> [b,10,10,16]
         out = self.conv2d_2(out)
+        out = self.bn2(out)
         # [b,10,10,16]->[b,5,5,16]
         out = self.pool_max2(out)
         out = self.relu2(out)
