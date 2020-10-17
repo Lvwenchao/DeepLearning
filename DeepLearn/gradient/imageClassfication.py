@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras import datasets, layers, optimizers
+from tensorflow.keras import datasets
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'

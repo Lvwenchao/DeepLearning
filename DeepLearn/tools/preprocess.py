@@ -11,6 +11,6 @@ def preprocess_onehot(x, y):
 
 
 def preprocess(x, y):
-    x = tf.cast(x, dtype=tf.float32) / 255.
+    x = 2 * tf.cast(x, dtype=tf.float32) / 255. - 1
     y = tf.cast(y, dtype=tf.int32)
     return x, y

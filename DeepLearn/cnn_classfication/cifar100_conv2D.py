@@ -1,108 +1,83 @@
-# write by Mrlv
-# coding:utf-8
 import tensorflow as tf
-from tensorflow.keras import datasets, optimizers, layers, Sequential
 from DeepLearn.tools import loadData
-
-conv_layers = [  # five unit layers
-    # the first unit (tow conv and one pool)
-    layers.Conv2D(64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.Conv2D(64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.MaxPool2D(pool_size=[2, 2], strides=2, padding="same"),
-
-    # the second unit
-    layers.Conv2D(128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.Conv2D(128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.MaxPool2D(pool_size=[2, 2], strides=2, padding="same"),
-
-    # the third unit
-    layers.Conv2D(256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.Conv2D(256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.MaxPool2D(pool_size=[2, 2], strides=2, padding="same"),
-
-    # the forth unit
-    layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.MaxPool2D(pool_size=[2, 2], strides=2, padding="same"),
-
-    # the fifth unit
-    layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
-    layers.MaxPool2D(pool_size=[2, 2], strides=2, padding="same")
-]
+import time
+import numpy as np
+from tensorflow.keras import Sequential, layers, metrics, optimizers
 
 
-def main():
-    conv_net = Sequential(conv_layers)
-    conv_net.build(input_shape=[None, 32, 32, 3])
+def run():
+    model_layers = [  # five unit layers
+        # the first unit (tow conv and one pool)
+        layers.Conv2D(64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.Conv2D(64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='SAME'),
 
-    fac_net = Sequential([
-        layers.Dense(256, activation=tf.nn.relu),
-        layers.Dense(128, activation=tf.nn.relu),
-        layers.Dense(100, activation=tf.nn.relu)
-    ])
-    fac_net.build(input_shape=[None, 512])
-    variables = fac_net.trainable_variables + conv_net.trainable_variables
+        # the second unit
+        layers.Conv2D(128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.Conv2D(128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='SAME'),
 
-    batch_size = 50
-    loadData.cifar_100_data(batch_size)
-    # (x_train, y_train), (x_test, y_test) = datasets.cifar100.load_data()
-    # y_train = tf.squeeze(y_train)
-    # y_test = tf.squeeze(y_test)
-    # print("data:", x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+        # the third unit
+        layers.Conv2D(256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.Conv2D(256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='SAME'),
+
+        # the forth unit
+        layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='SAME'),
+
+        # the fifth unit
+        layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.Conv2D(512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu),
+        layers.MaxPool2D(pool_size=[2, 2], strides=2, padding='SAME'),
+
+        layers.Flatten(),
+        layers.Dense(256, activation='relu'),
+        layers.Dense(128, activation='relu'),
+        layers.Dense(100, activation='relu'),
+        layers.Softmax()
+    ]
+
+    network = Sequential(model_layers)
+    network.build(input_shape=[None, 32, 32, 3])
+    optimizer = optimizers.Adam(1e-4)
+
+    train_data, val_data, test_data = loadData.cifar100_data(64)
+    simple = next(iter(test_data))
+    print(simple[0].shape, simple[1].shape)
+
+    for epoch in range(10):
+        for step, (x, y) in enumerate(train_data):
+            with tf.GradientTape() as tape:
+                y = tf.one_hot(y, depth=100)
+                out = network(x)
+                loss = tf.losses.categorical_crossentropy(y, out, from_logits=True)
+                loss = tf.reduce_mean(loss)
+
+            grads = tape.gradient(loss, network.trainable_variables)
+            optimizer.apply_gradients(zip(grads, network.trainable_variables))
+
+            if step % 100 == 0:
+                print(step, "loss", loss)
+
+        for step, (x, y) in enumerate(val_data):
+            out = network(x)
+            out = tf.argmax(out, axis=-1)
+            out = tf.cast(out, )
+    # network = Sequential(model_layers)
+    # network.build(input_shape=[None, 32, 32, 3])
+    # network.summary()
     #
-    # train_date = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-    # test_data = tf.data.Dataset.from_tensor_slices((x_test, y_test))
-    # train_date = train_date.shuffle(10000).map(preprocess).batch(batch_size)
-    # test_data = test_data.shuffle(10000).map(preprocess).batch(batch_size)
+    # classes = np.array(['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'])
+    # train_data, val_data, test_data = loadData.cifar10_data(32)
     #
-    # sample = next(iter(train_date))
-    # print(sample[0].shape, sample[1].shape, tf.reduce_max(sample[1]), tf.reduce_min(sample[1]))
+    # network.compile(optimizer=optimizers.Adam(lr=0.1),
+    #                 loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+    #                 metrics=['accuracy'])
     #
-    # optimizer = optimizers.Adam(lr=1e-4)
-    #
-    # for epoch in range(50):
-    #     for step, (x_train, y_train) in enumerate(train_date):
-    #         # [b,32,32,3]->[b,1,1,52]
-    #         with tf.GradientTape() as tape:
-    #             out = conv_net(x_train)
-    #             out = tf.reshape(out, [-1, 512])
-    #             # [b,512]->[b,100]
-    #             logits = fac_net(out)
-    #             y_onehot = tf.one_hot(y_train, depth=100)
-    #
-    #             # compute loss
-    #             loss = tf.losses.categorical_crossentropy(y_onehot, logits, from_logits=True)
-    #             loss = tf.reduce_mean(loss)
-    #
-    #         grads = tape.gradient(loss, variables)
-    #         optimizer.apply_gradients(zip(grads, variables))
-    #
-    #         if step % 100 == 0:
-    #             print(step, "loss:", float(loss))
-    #
-    #     # test
-    #     correct_total, num_total = 0, 0
-    #     for step, (x, y) in enumerate(test_data):
-    #         # [b,32,32,3}->[b,1,1,512]
-    #         out = conv_net(x)
-    #         # [b,1,1,512]->[b,512]
-    #         out = tf.reshape(out, [-1, 512])
-    #         # [b,512]->[b,100]
-    #         logits = fac_net(out)
-    #         prob = tf.nn.softmax(logits, axis=1)
-    #         # [b,100]->[b,]
-    #         pre = tf.argmax(prob, axis=1)
-    #         pre = tf.cast(pre, dtype=tf.int32)
-    #         # compute accrucy
-    #         correct = tf.cast(tf.equal(y, pre), dtype=tf.int32)
-    #         correct = tf.reduce_sum(correct)
-    #         correct_total += int(correct)
-    #         num_total += x.shape[0]
-    #
-    #     accuracy = float(correct_total / num_total)
-    #     print(epoch, "acc", accuracy)
+    # network.fit(train_data, epochs=5, validation_data=val_data, validation_freq=1)
 
 
 if __name__ == '__main__':
-    main()
+    run()

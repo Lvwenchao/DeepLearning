@@ -1,12 +1,11 @@
 # write by Mrlv
 # coding:utf-8
 from abc import ABC
-
 from tensorflow.keras import layers, Model, Sequential
 import tensorflow as tf
 
 
-# 自定义层
+# customize layers
 class CustomizeDense(layers.Layer):
     def __init__(self, inp_dim, outp_dim):
         super(CustomizeDense, self).__init__()
@@ -18,7 +17,7 @@ class CustomizeDense(layers.Layer):
         return out
 
 
-# 自定义模型
+# customize model
 class MyModel(Model):
     def get_config(self):
         pass
@@ -48,7 +47,7 @@ class MyModel(Model):
         return out
 
 
-# CNN
+# CNN LetNet
 class LetNet(Model, ABC):
     def __init__(self):
         super(LetNet, self).__init__()
@@ -56,7 +55,7 @@ class LetNet(Model, ABC):
         self.bn1 = layers.BatchNormalization()
         self.pool_max1 = layers.MaxPool2D(pool_size=2, strides=2)
         self.relu1 = layers.ReLU()
-        self.conv2d_2 = layers.Conv2D(16, kernel_size=3, strides=1)
+        self.conv2d_2 = layers.Conv2D(16, kernel_size=5, strides=1)
         self.bn2 = layers.BatchNormalization()
         self.pool_max2 = layers.MaxPool2D(pool_size=2, strides=2)
         self.relu2 = layers.ReLU()
@@ -66,6 +65,7 @@ class LetNet(Model, ABC):
         self.fc1 = layers.Dense(120, activation='relu')
         self.fc2 = layers.Dense(84, activation='relu')
         self.fc3 = layers.Dense(10)
+        self.softmax = layers.Softmax()
 
     def call(self, inputs, training=None, mask=None):
         # [b,28,28,1]->[b,24,24,6]
@@ -87,60 +87,72 @@ class LetNet(Model, ABC):
         out = self.fc1(out)
         out = self.fc2(out)
         out = self.fc3(out)
+
+        out = self.softmax(out)
         return out
 
 
-# Resnet 层
+# resbasicBlock
 class BasicBlock(layers.Layer):
-    def __init__(self, filter_num, stride=1):
+    def __init__(self, filter_dim, stride):
         super(BasicBlock, self).__init__()
-        self.conv1 = layers.Conv2D(filter_num, (3, 3), strides=stride, padding="same")
+        self.conv1 = layers.Conv2D(filter_dim, kernel_size=(3, 3), strides=stride, padding="same")
         self.bn1 = layers.BatchNormalization()
-        self.relu = layers.Activation('relu')
+        self.relu1 = layers.ReLU()
 
-        self.conv2 = layers.Conv2D(filter_num, (3, 3), strides=1, padding='same')
+        self.conv2 = layers.Conv2D(filter_dim, kernel_size=(3, 3), strides=1, padding="same")
         self.bn2 = layers.BatchNormalization()
+        self.relu2 = layers.ReLU()
+
+        # 残差层
         if stride != 1:
             self.downsample = Sequential()
-            self.downsample.add(layers.Conv2D(filter_num, (1, 1), strides=stride))
-        else:
+            self.downsample.add(layers.Conv2D(filter_dim, kernel_size=(3, 3), strides=stride, padding="same"))
+        elif stride == 1:
             self.downsample = lambda x: x
+        else:
+            raise Exception("inputshape channel can't match outputshape")
 
-    def call(self, inputs, training=None):
+    def call(self, inputs, **kwargs):
         out = self.conv1(inputs)
         out = self.bn1(out)
-        out = self.relu(out)
-
+        out = self.relu1(out)
         out = self.conv2(out)
         out = self.bn2(out)
+        out = self.relu2(out)
+        inputs = self.downsample(inputs)
 
-        identity = self.downsample(inputs)
-
-        output = layers.add([out, identity])
-        output = tf.nn.relu(output)
-
-        return output
+        out = tf.add(out, inputs)
+        return out
 
 
-# ResnetModel
-class ResNet(Model):
-    def get_config(self):
-        pass
+def build_block(filter_dim, blocks, stride=1):
+    res_block = Sequential()
+    res_block.add(BasicBlock(filter_dim=filter_dim, stride=stride))
+    for i in range(1, blocks):
+        res_block.add(BasicBlock(filter_dim=filter_dim, stride=1))
 
-    def __init__(self, layers_dim, num_class=100):  # [2,2,2, 2]
+    return res_block
+
+
+# RNN models
+class ResNet(Model, ABC):
+    def __init__(self, layer_dims, classes):
         super(ResNet, self).__init__()
-        self.start = Sequential([layers.Conv2D(64, (3, 3), strides=(1, 1)),
+
+        self.start = Sequential([layers.Conv2D(64, (3, 3), strides=1, padding="same", ),
                                  layers.BatchNormalization(),
-                                 layers.Activation('relu'),
-                                 layers.MaxPool2D(pool_size=(2, 2), strides=(1, 1), padding='same')
-                                 ])
-        self.layer1 = self.build_resblock(64, layers_dim[0])
-        self.layer2 = self.build_resblock(128, layers_dim[1], stride=2)
-        self.layer3 = self.build_resblock(256, layers_dim[2], stride=2)
-        self.layer4 = self.build_resblock(512, layers_dim[3], stride=2)
-        # [b,512,h,w]
-        self.avgpool = layers.GlobalAveragePooling2D()
-        self.fc = layers.Dense(num_class)
+                                 layers.ReLU(),
+                                 layers.MaxPool2D(pool_size=(2, 2), strides=2)])
+
+        self.layer1 = build_block(64, layer_dims[0])
+        self.layer2 = build_block(128, layer_dims[1], stride=2)
+        self.layer3 = build_block(256, layer_dims[2], stride=2)
+        self.layer4 = build_block(512, layer_dims[3], stride=2)
+
+        self.fla = layers.Flatten()
+
+        self.fc = layers.Dense(classes)
 
     def call(self, inputs, training=None, mask=None):
         out = self.start(inputs)
@@ -149,22 +161,13 @@ class ResNet(Model):
         out = self.layer3(out)
         out = self.layer4(out)
 
-        out = self.avgpool(out)
+        out = self.fla(out)
         out = self.fc(out)
+
         return out
 
-    @staticmethod
-    def build_resblock(filter_num, blocks, stride=1):
-        res_block = Sequential()
-        # may down sample
-        res_block.add(BasicBlock(filter_num, stride))
-        for _ in range(1, blocks):
-            res_block.add(BasicBlock(filter_num, stride=1))
-
-        return res_block
 
 
-# RNN层
 class RNN(Model, ABC):
     def __init__(self, units, embedding_len, input_len, total_words):
         """
@@ -196,6 +199,7 @@ class RNN(Model, ABC):
         # [b,64]->[b,1]
         out = self.fc(out)
         prob = tf.sigmoid(out)
+
         return prob
 
 
@@ -210,11 +214,19 @@ class LSTM(Model, ABC):
         """
         super(LSTM, self).__init__()
         # embedding
-        self.embedding = layers.Embedding(input_dim=total_words, output_dim=embedding_len, input_length=input_len)
+        self.embedding = layers.Embedding(input_dim=total_words,
+                                          output_dim=embedding_len,
+                                          input_length=input_len)
+
         # RnnLayer
         self.rnn = Sequential([
-            layers.LSTM(units, dropout=0.5, return_sequences=True, unroll=True),
-            layers.LSTM(units, dropout=0.5, unroll=True)
+            layers.LSTM(units,
+                        dropout=0.5,
+                        return_sequences=True,
+                        unroll=True),
+            layers.LSTM(units,
+                        ropout=0.5,
+                        unroll=True)
         ])
 
         # fullConnection
@@ -229,9 +241,10 @@ class LSTM(Model, ABC):
         # [b,64]->[b,1]
         out = self.fc(out)
         prob = tf.sigmoid(out)
+
         return prob
 
 
 # resnet18
-def resnet18():
-    return ResNet([2, 2, 2, 2])
+def resnet18(classes):
+    return ResNet(layer_dims=[2, 2, 2, 2], classes=classes)
