@@ -8,6 +8,26 @@
 .idea/
 ./resources/logs/
 resources/logs/
-DeepLearn/compilefitandsave/models/
+DeepLearn/keras_module/models/
 resources/models/
 
+DeepLearn/keras_module/__pycache__/
+DeepLearn/rnn_classfication/__pycache__/
+Hyperspectral/__pycache__/
+resources/data/Indian_pines_corrected.mat
+resources/data/test_11_1.mat
+resources/data/test_11_2.mat
+resources/data/test_11_3.mat
+resources/data/test_11_4.mat
+resources/data/test_11_5.mat
+resources/data/test_11_6.mat
+resources/data/train_11_1.mat
+resources/data/train_11_2.mat
+resources/data/train_11_3.mat
+resources/data/train_11_4.mat
+resources/data/train_11_5.mat
+resources/data/train_11_6.mat
+resources/data/train_11_7.mat
+resources/data/train_11_8.mat
+resources/images/autoEncode_img/
+tools/__pycache__/
