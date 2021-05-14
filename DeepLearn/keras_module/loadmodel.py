@@ -1,45 +1,30 @@
 # write by Mrlv
 # coding:utf-8
 import tensorflow as tf
+import tensorboard
 import os
-import cv2
-from tensorflow.keras import optimizers
-from tools import loadData, models
+
+from tensorflow.keras import applications, layers
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 # readData
 def main():
-    batch_size = 128
-    train_data, test_data = loadData.minist_data(batch_size)
-    simple = next(iter(train_data))
-    print(simple[0].shape, simple[1].shape)
 
-    # 导入模型
-    network = models.MyModel(784)
+    resnet = applications.ResNet50(weights='imagenet', include_top=False)
+    resnet.build((4, 224, 224, 3))
+    # resnet.summary()
+    x = tf.random.normal((4, 224, 224, 3))
+    out = resnet(x)
 
-    network.compile(optimizer=optimizers.Adam(lr=0.01),
-                    loss=tf.losses.CategoricalCrossentropy(from_logits=True),
-                    metrics=['accuracy'])
-
-    network.load_weights(r'E:\pythonProject\DeepLearn\resources\models\mnist').expect_partial()
-
-    # 对存储的模型进行测试
-    network.evaluate(test_data)
-
-    # 预测
-    img = simple[0][0]
-    pre = network(img)
-    pre_label = tf.argmax(pre, axis=1)
-    print(img.shape)
-    print(pre_label)
-
-    # show predict img
-    cv2.namedWindow('img', 0)
-    cv2.imshow('img', img.numpy())
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    print(out.shape)
+    # 全局平均池化
+    global_average_layer = layers.GlobalAveragePooling2D()
+    # 利用上一层的输出作为本层的输入，测试其输出
+    x = tf.random.normal([4, 7, 7, 2048])
+    out = global_average_layer(x)  # 池化层降维
+    print(out.shape)
 
 
 if __name__ == '__main__':

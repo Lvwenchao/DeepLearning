@@ -16,7 +16,7 @@ dataset = DataSets()
 def main():
     # loadData
     batch_size = 128
-    train_data, val_data, test_data = dataset.load_data("mnist", 128, 10)
+    train_data, val_data, test_data = dataset.load_tensorflow_data("mnist", 128, 10)
 
 
 def plot_image(predictions_array, true_label, img):
@@ -43,7 +43,7 @@ def train_mnist():
     # loadData
     batch_size = 128
 
-    train_data, test_data = dataset.load_data("mnist", 128, 10)
+    train_data, test_data = dataset.load_tensorflow_data("mnist", 128, 10)
     sample = next(iter(train_data))
     print(sample[0].shape, sample[1].shape)
     # train
@@ -65,7 +65,7 @@ def train_mnist():
 
 def train_fationmnist():
     batch_size = 128
-    train_data, test_data = dataset.load_data("fashon_mnist", 128, 10)
+    train_data, test_data = dataset.load_tensorflow_data("fashon_mnist", 128, 10)
     sample = next(iter(train_data))
     print(sample[0].shape, sample[1].shape)
     # train

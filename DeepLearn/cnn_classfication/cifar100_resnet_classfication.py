@@ -7,7 +7,7 @@ from tools import DataSets
 
 batch_size = 30
 # loadData
-train_data, val_data, test_data = DataSets.load_data(dataset_name="cifar10", batch_size=30, classes=10)
+train_data, val_data, test_data = DataSets.load_tensorflow_data(dataset_name="cifar10", batch_size=30, classes=10)
 sample = next(iter(train_data))
 
 print(sample[0].shape, sample[1].shape, tf.reduce_max(sample[1]), tf.reduce_min(sample[1]))

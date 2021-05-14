@@ -1,8 +1,10 @@
 # write by Mrlv
 # coding:utf-8
+
 import tensorflow as tf
 from tensorflow.keras import datasets
 from sklearn.model_selection import train_test_split
+from tools.dataset import read_csv
 
 
 # 加载自定义数据集
@@ -21,10 +23,10 @@ class DataSets(object):
             'cifar100': datasets.cifar100.load_data,
         }
 
-    def load_data(self, dataset_name, batch_size, classes):
+    def load_tensorflow_data(self, dataset_name, batch_size, classes):
         """
         :param classes: 所含内别
-        :param dataset_name: 数据集名称("mnist","fashon_mnist","cifar_10","cifar_100")
+        :param dataset_name: 数据集名称("mnist","fashon_mnist","cifar10","cifar100")
         :param batch_size:  分割大小
         :return: 训练、验证、测试数据
         """
@@ -35,8 +37,9 @@ class DataSets(object):
             (x_train, y_train), (x_test, y_test) = self.data_dict[dataset_name]()
             y_train = tf.squeeze(y_train)
             y_test = tf.squeeze(y_test)
-            y_train = tf.one_hot(y_train, depth=classes)
-            y_test = tf.one_hot(y_test, depth=classes)
+            if dataset_name != "cifar10":
+                y_train = tf.one_hot(y_train, depth=classes)
+                y_test = tf.one_hot(y_test, depth=classes)
             x_train, x_val = train_test_split(x_train, train_size=0.8)
             y_train, y_val = train_test_split(y_train.numpy(), train_size=0.8)
             train_date = tf.data.Dataset.from_tensor_slices((x_train, y_train))
@@ -46,3 +49,7 @@ class DataSets(object):
             val_data = val_data.map(preprocess).shuffle(10000).batch(batch_size)
             test_data = test_data.map(preprocess).batch(batch_size)
             return train_date, val_data, test_data
+
+    def load_pokemon(self, filename, test_size):
+        db_train, db_test = read_csv(filename, test_size)
+        return db_train, db_test

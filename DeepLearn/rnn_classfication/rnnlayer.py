@@ -48,8 +48,6 @@ def main():
 
     model.evaluate(test_data)
 
-    tf.saved_model.sa
-
 
 def test_model():
     units = 64

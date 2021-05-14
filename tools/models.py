@@ -51,6 +51,7 @@ class MyModel(Model):
 class LetNet(Model, ABC):
     def __init__(self):
         super(LetNet, self).__init__()
+        tf.nn.conv2d()
         self.conv2d_1 = layers.Conv2D(6, kernel_size=5, strides=1)
         self.bn1 = layers.BatchNormalization()
         self.pool_max1 = layers.MaxPool2D(pool_size=2, strides=2)
@@ -92,8 +93,17 @@ class LetNet(Model, ABC):
         return out
 
 
+"""
+ RNN 实现
+"""
+
+
 # resbasicBlock
 class BasicBlock(layers.Layer):
+    """
+    filter_dim
+    stride
+    """
     def __init__(self, filter_dim, stride):
         super(BasicBlock, self).__init__()
         self.conv1 = layers.Conv2D(filter_dim, kernel_size=(3, 3), strides=stride, padding="same")
@@ -268,6 +278,20 @@ class AE(Model):
         x_hat = self.decoder(h)
 
         return x_hat
+
+    def get_config(self):
+        pass
+
+
+class AEConv(Model):
+    def __init__(self):
+        super(AEConv, self).__init__()
+        self.encoder = Sequential([
+            layers.C
+        ])
+
+    def call(self, inputs, training=None, mask=None):
+        pass
 
     def get_config(self):
         pass
